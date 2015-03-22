@@ -56,7 +56,7 @@
 	* Skriv klasser med stor forbokstav, ex "MyClass.py"
 	* Skriv funksjoner med liten forbokstav, og stor bokstav for hvert nytt ord, ex "myFunction()"
 	* Skriv variabelnavn med små bokstaver og understretk, ex. "my_variable"
-    * **1.** linjeskift mellom metoder og variabler
+    * **Ett** linjeskift mellom metoder og variabler
 * Kommentering / Dokumentasjon:
     * Skrives på formen `# <kommentar>`
     * Legg til kommentarer der du føler det er nødvendig for å forklare det metoden eller feltet er/gjør
