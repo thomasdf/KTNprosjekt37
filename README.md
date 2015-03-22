@@ -1,4 +1,4 @@
-# KTNprosjekt37
+﻿# KTNprosjekt37
 #### KTNprosjekt Gruppe 37: Dag Erik Homdrum Løvgren, Daniel lines, Lars Moe Ellefsen, Oscar Thån Conrad, Thomas Drabløs Frøysa.
 
 ## Git-kommandoer
@@ -49,12 +49,14 @@
 				* `"Endret readme-en`
 				* `<tom linje>`
 				* `Har endret readme-en for å reflektere de endringer vi har gjort i prosjektet."`
+				* `<tom linje>`
+				* `<resten av commit-bodyen>`
 * Python:
-    * *Samme konvensjoner som vi hadde i Java.*
+    * **Samme konvensjoner som vi hadde i Java.**
 	* Skriv klasser med stor forbokstav, ex "MyClass.py"
 	* Skriv funksjoner med liten forbokstav, og stor bokstav for hvert nytt ord, ex "myFunction()"
 	* Skriv variabelnavn med små bokstaver og understretk, ex. "my_variable"
-    * *1.* linjeskift mellom metoder og variabler.
+    * **1.** linjeskift mellom metoder og variabler
 * Kommentering / Dokumentasjon:
-    * Skrives på formen `# <kommentar>`.
-    * Legg til kommentarer der du føler det er nødvendig for å forklare det metoden eller feltet er/gjør.
+    * Skrives på formen `# <kommentar>`
+    * Legg til kommentarer der du føler det er nødvendig for å forklare det metoden eller feltet er/gjør
