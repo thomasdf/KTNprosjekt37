@@ -52,6 +52,7 @@
 				* `<tom linje>`
 				* `<resten av commit-bodyen>`
 * Python:
+    * **Skriv kode i "ktnp37"-mappen, *ikke* i "Skeleton"-mappen, den er bare for referanse**
     * **Samme konvensjoner som vi hadde i Java.**
 	* Skriv klasser med stor forbokstav, ex "MyClass.py"
 	* Skriv funksjoner med liten forbokstav, og stor bokstav for hvert nytt ord, ex "myFunction()"
