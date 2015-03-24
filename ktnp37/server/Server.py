@@ -99,10 +99,10 @@ def sendHelpTexttoThisClient(client):
      + "names: list the user in the chatroom.\n"
      + "help: lists this message.\n"
     
-    self.response(client, 'info', help_content, '')
+    response(client, 'info', help_content, '')
 
 def sendError(client):
-    self.response(client, 'error', 'This is embarrassing! Type help for command reference.\n Are you logged in?', '')
+    response(client, 'error', 'This is embarrassing! Type help for command reference.\n Are you logged in?', '')
 
 def response(client, responsetype, content, sender):
     # Get the timestamp for the time NOW
