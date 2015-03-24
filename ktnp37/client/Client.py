@@ -33,7 +33,6 @@ class Client:
                 self.send_payload(message[0], None)
             elif(len(message)==2):
                 self.send_payload(message[0],message[1])
-                
 
         self.disconnect()
 
@@ -43,8 +42,7 @@ class Client:
 
     def disconnect(self):
         # TODO: Handle disconnection
-        message = json.dumps([{'request': 'logout'}, {'content': ''}])
-        send_payload(message)
+        send_payload('logout',None)
         # find client 
         pass
 
@@ -55,7 +53,7 @@ class Client:
 
     def send_payload(self, request, content):
         # TODO: Handle sending of a payload
-        data = json.dumps([{'request': request}, {'content': content}])
+        data = json.dumps({'request': request, 'content': content})
         self.connection.send(data)
         pass
 
