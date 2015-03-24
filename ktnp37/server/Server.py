@@ -2,13 +2,9 @@
 import SocketServer
 import json
 
-history = []
+history = ''
 logged_in = []
 
-
-def handlePayload(ClientHandler client):
-
-    json_string = client.received_string
 
 
 class ClientHandler(SocketServer.BaseRequestHandler):
@@ -31,18 +27,43 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         while True:
             received_string = self.connection.recv(4096)
             # TODO: Add handling of received payload from client
+            
             received_dict = json.loads(received_string)
 
-            if((received_dict[0])['request'] == "login"):
-                user_name = (received_dict[0])['content']
-
-            elif((received_dict[0])['request'] == "logout"):
-                user_name = (received_dict[0])['content']
-            elif((received_dict[0])['request'] == "msg"):
-
-            elif((received_dict[0])['request'] == "names"):
-
+            if(self in logged_in):
+                if((received_dict[0])['request'] == "login"):
+                    user_name = (received_dict[0])['content']
+                elif((received_dict[0])['request'] == "logout"):
+                    logout(self)
+                elif((received_dict[0])['request'] == "msg"):
+                    message = (received_dict[0])['content']
+                    sendMessagetoClients(message)
+                elif((received_dict[0])['request'] == "names"):
+                    sendNamestoThisClient(self)
+                elif((received_dict[0])['request'] == "help"):
+                    sendHelpTexttoThisClient(self)
+                else:
+                    sendError(self)
             elif((received_dict[0])['request'] == "help"):
+                sendHelpTexttoThisClient(self)
+            else:
+                sendError(self)
+
+
+
+def login(ClientHandler client, user_name):
+
+def logout(ClientHandler client):
+
+def sendMessagetoClients(message):
+
+def sendNamestoThisClient(ClientHandler client):
+
+def sendHelpTexttoThisClient(ClientHandler client):
+
+def sendError(ClientHandler client):
+    
+
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
