@@ -89,6 +89,13 @@ def sendMessagetoClients(message):
         response(logged_in[x], "message", message, logged_in(index+1))
 
 def sendNamestoThisClient(client):
+    usernames = ""
+    for (x in xrange (1.len,(logged_in), 2)):
+        usernames.append(logged_in[x].append("\n"))
+    response(client, "info", content, "")    
+
+
+
 
 def sendHelpTexttoThisClient(client):
     help_content = "Help\n\n"
