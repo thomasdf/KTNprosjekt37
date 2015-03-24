@@ -30,7 +30,7 @@ class MessageReceiver(Thread):
         # TODO: Make MessageReceiver receive and handle payloads
         while True:
             # Listen to the server
-            self.connection.listen(5)
+            self.connection.listen(4)
 
             # Get the payload from the json-object
             payload = json.loads(connection.recv(4096))
