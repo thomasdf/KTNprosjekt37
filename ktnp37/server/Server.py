@@ -3,6 +3,7 @@ import SocketServer
 import json
 from time import gmtime, strftime
 import re
+import sys
 
 history = ''
 logged_in = []
@@ -38,7 +39,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 if "request" not in received_dict or "content" not in received_dict:
                     raise ValueError
             except:
-                self.sendError()
+                self.sendError("Missing either the request-header or the content of the request from the client.")
                 continue
 
             if self in logged_in:
@@ -52,24 +53,28 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 elif received_dict["request"] == "help":
                     self.sendHelpTexttoThisClient()
                 else:
-                    self.sendError()
+                    self.sendError("Your command is not recognized.")
             elif received_dict["request"] == "help":
                 self.sendHelpTexttoThisClient()
             elif received_dict["request"] == "login":
                     user_name = received_dict['content']
                     self.login(user_name)
             else:
-                self.sendError()
+                self.sendError("You are not logged in. Type 'login <username>' to log in.")
 
 
     def usernameValid(self, user_name):
 
         if not re.match("^[A-Za-z0-9_-]*$", user_name):
             return False
-            #print("Error! Only characters a-z, A-Z and 0-9 are allowed!")
         else:
             return True
-            #print("Your username is now: " + username)
+
+    def makeHeader(self, head):
+        min_size = len(head) if len(head) > 50 else 50
+        filler = "#"*(min_size + 6) + "\n"
+        center = "#  " + head.center(min_size) + "  #\n"
+        return filler + center + filler + "\n"
 
     def login(self, user_name):
         global logged_in
@@ -77,9 +82,9 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         if self.usernameValid(user_name):
             logged_in.append(self)
             logged_in.append(user_name)
-            self.response("info", history + "\n--------------\n logged in as " + user_name, "")
+            self.response("info", self.makeHeader("Log from the chat-server") + history + "\n\n" + self.makeHeader("Logged in as " + user_name), "")
         else:
-            self.sendError()
+            self.sendError("Your username is not valid. Only characters a-z, A-Z, 0-9, dashes and underscores are allowed.")
 
     def logout(self):
         # Defince global
@@ -90,7 +95,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         del logged_in[index:index+2]
         
         # Send a logout-respone to the client
-        self.response("info", "Successfully logged out.", "")
+        self.response("info", self.makeHeader("You have been successfully logged out."), "")
 
     def sendMessagetoClients(self, message):
         global history
@@ -100,15 +105,18 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             logged_in[x].response("message", message, logged_in[index+1])
 
     def sendNamestoThisClient(self):
-        pass
+        usernames = self.makeHeader("Users currently logged into the server")
+        for i in xrange (1, len(logged_in), 2):
+            usernames += logged_in[i] + "\n"
+        self.response("info", usernames, "")
 
     def sendHelpTexttoThisClient(self):
-        help_content = "Help\n\n" + "This client console accepts commands: \n\n" + "login <username>: logs on the server with the given username.\n" + "logout: logs out of the server.\n" + "msg <message>: sends a message to the chatroom.\n" + "names: list the user in the chatroom.\n" + "help: lists this message.\n"
+        usernames = self.makeHeader("Help") + "This client console accepts commands: \n\n" + "login <username>: logs on the server with the given username.\n" + "logout: logs out of the server.\n" + "msg <message>: sends a message to the chatroom.\n" + "names: list the user in the chatroom.\n" + "help: lists this message.\n\n"
 
-        self.response('info', help_content, '')
+        self.response('info', usernames, '')
 
-    def sendError(self):
-        self.response('error', 'This is embarrassing! Type help for command reference.\n Are you logged in?', '')
+    def sendError(self, message):
+        self.response('error', self.makeHeader("Error") + 'Well, this is embarrassing! An error has occured. Maybe you could help yourself out by typing help for command reference?\n\n', '')
 
     def response(self, responsetype, content, sender):
         try:
@@ -139,7 +147,16 @@ if __name__ == "__main__":
 
     No alterations is necessary
     """
-    HOST, PORT = 'localhost', 9998
+    # HOST, PORT = 'localhost', 9998
+    # print 'Server running...'
+
+    # Take host and port from arguments if possible
+    HOST = 'localhost'
+    PORT = 9998
+    if len(sys.argv) > 1:
+        HOST = sys.argv[1]
+        if len(sys.argv) > 2:
+            PORT = int(sys.argv[2])
     print 'Server running...'
 
     # Set up and initiate the TCP server
