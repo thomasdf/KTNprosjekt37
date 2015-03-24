@@ -2,6 +2,7 @@
 import SocketServer
 import json
 from time import gmtime, strftime
+import re
 
 history = ''
 logged_in = []
@@ -32,28 +33,43 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             received_dict = json.loads(received_string)
 
             if(self in logged_in):
-                if((received_dict[0])['request'] == "login"):
-                    user_name = (received_dict[0])['content']
-                    login(self, user_name)
-                elif((received_dict[0])['request'] == "logout"):
+                elif(received_dict["request"] == "logout"):
                     logout(self)
-                elif((received_dict[0])['request'] == "msg"):
+                elif(received_dict["request"] == "msg"):
                     message = (received_dict[0])['content']
                     sendMessagetoClients(message)
-                elif((received_dict[0])['request'] == "names"):
+                elif(received_dict["request"] == "names"):
                     sendNamestoThisClient(self)
-                elif((received_dict[0])['request'] == "help"):
+                elif(received_dict["request"] == "help"):
                     sendHelpTexttoThisClient(self)
                 else:
                     sendError(self)
-            elif((received_dict[0])['request'] == "help"):
+            elif(received_dict["request"] == "help"):
                 sendHelpTexttoThisClient(self)
+            elif(received_dict["request"] == "login"):
+                    user_name = (received_dict[0])['content']
+                    login(self, user_name)
             else:
                 sendError(self)
 
 
+def usernameValid(user_name):
+
+    if not re.match("^[A-Za-z0-9_-]*$", user_name):
+        return False
+        #print("Error! Only characters a-z, A-Z and 0-9 are allowed!")
+    else:
+        return True
+        #print("Your username is now: " + username)
 
 def login(client, user_name):
+    if(usernameValid(user_name)):
+        logged_in.append(client)
+        logged_in.append(user_name)
+        response(client, "info", history, "")
+        response(client, "info", "--------------\n logged in as ".append(user_name), client)
+    else:
+        sendError(client)
 
 def logout(client):
     # Remove the client from the logged_in list
@@ -67,12 +83,26 @@ def logout(client):
     client.connection.close()
 
 def sendMessagetoClients(message):
+    index = logged_in.index(self)
+    history.append(logged_in[index+1] + ": " + message + "\n")
+    for(x in xrange(0,len(logged_in), 2)):
+        response(logged_in[x], "message", message, logged_in(index+1))
 
 def sendNamestoThisClient(client):
 
 def sendHelpTexttoThisClient(client):
+    help_content = "Help\n\n"
+     + "This client console accepts commands: \n\n"
+     + "login <username>: logs on the server with the given username.\n"
+     + "logout: logs out of the server.\n"
+     + "msg <message>: sends a message to the chatroom.\n"
+     + "names: list the user in the chatroom.\n"
+     + "help: lists this message.\n"
+    
+    response(client, 'info', help_content, '')
 
 def sendError(client):
+    response(client, 'error', 'This is embarrassing! Type help for command reference.\n Are you logged in?', '')
 
 def response(client, responsetype, content, sender):
     # Get the timestamp for the time NOW
