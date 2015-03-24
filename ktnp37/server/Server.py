@@ -83,12 +83,26 @@ def logout(client):
     client.connection.close()
 
 def sendMessagetoClients(message):
+    index = logged_in.index(self)
+    history.append(logged_in[index+1] + ": " + message + "\n")
+    for(x in xrange(0,len(logged_in), 2)):
+        response(logged_in[x], "message", message, logged_in(index+1))
 
 def sendNamestoThisClient(client):
 
 def sendHelpTexttoThisClient(client):
+    help_content = "Help\n\n"
+     + "This client console accepts commands: \n\n"
+     + "login <username>: logs on the server with the given username.\n"
+     + "logout: logs out of the server.\n"
+     + "msg <message>: sends a message to the chatroom.\n"
+     + "names: list the user in the chatroom.\n"
+     + "help: lists this message.\n"
+    
+    self.response(client, 'info', help_content, '')
 
 def sendError(client):
+    self.response(client, 'error', 'This is embarrassing! Type help for command reference.\n Are you logged in?', '')
 
 def response(client, responsetype, content, sender):
     # Get the timestamp for the time NOW
