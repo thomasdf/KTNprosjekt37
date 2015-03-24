@@ -59,6 +59,13 @@ def logout(client):
 def sendMessagetoClients(message):
 
 def sendNamestoThisClient(client):
+    usernames = ""
+    for (x in xrange (1.len,(logged_in), 2)):
+        usernames.append(logged_in[x].append("\n"))
+    response(client, "info", content, "")    
+
+
+
 
 def sendHelpTexttoThisClient(client):
 
