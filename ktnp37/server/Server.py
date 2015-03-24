@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import SocketServer
 import json
+from time import gmtime, strftime
 
 history = ''
 logged_in = []
@@ -65,6 +66,8 @@ def sendHelpTexttoThisClient(client):
 def sendError(client):
 
 def response(responsetype, content, sender):
+    timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    
 
     
 
