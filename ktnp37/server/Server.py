@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
 import SocketServer
+import json
+
+history = []
+logged_in = []
+
+
+def handlePayload(ClientHandler client):
+
+    json_string = client.received_string
 
 
 class ClientHandler(SocketServer.BaseRequestHandler):
@@ -21,9 +30,19 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         # Loop that listens for messages from the client
         while True:
             received_string = self.connection.recv(4096)
-            
             # TODO: Add handling of received payload from client
+            received_dict = json.loads(received_string)
 
+            if((received_dict[0])['request'] == "login"):
+                user_name = (received_dict[0])['content']
+
+            elif((received_dict[0])['request'] == "logout"):
+                user_name = (received_dict[0])['content']
+            elif((received_dict[0])['request'] == "msg"):
+
+            elif((received_dict[0])['request'] == "names"):
+
+            elif((received_dict[0])['request'] == "help"):
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
