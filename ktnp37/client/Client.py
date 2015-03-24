@@ -15,8 +15,12 @@ class Client:
 
         # Set up the socket connection to the server
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Create the Message Receiver for the socket
         self.host = host
         self.server_port = server_port
+        self.receiver = MessageReceiver(self, self.connection)
+        self.dc = False
 
         # TODO: Finish init process with necessary code
         # self.connection.bind((self.host, self.server_port))
@@ -28,36 +32,49 @@ class Client:
         # Initiate the connection to the server
         self.connection.connect((self.host, self.server_port))
 
-        # Accepting the connection and creating a clientSocket
-        (clientSocket, (ip, addr)) = self.connection.accept()
-
-        # Create the Message Receiver for the socket
-        message_receiver = MessageReceiver(self, clientSocket)
+        # Start the MSG Receiver
+        self.receiver.start()
 
         message = ""
-        while message != "logout":
-            message = raw_input(": ")
+        while not self.dc:
+            message = raw_input()
             message = message.strip()
-            message = message.split()
-            if len(message)==1:
-                self.send_payload(message[0], None)
-            elif len(message)==2:
-                self.send_payload(message[0],message[1])
+            splitted = message.split()
+            if (len(splitted) == 0):
+                continue
+            elif len(splitted) == 1:
+                if splitted[0] == "logout":
+                    self.dc = True
+                self.send_payload(splitted[0], None)
+            elif len(splitted) == 2:
+                self.send_payload(splitted[0], splitted[1])
+            else:
+                first_space = message.index(" ")
+                self.send_payload(message[:first_space], message[first_space+1:])
         self.disconnect()
 
     def disconnect(self):
         # TODO: Handle disconnection
-        send_payload('logout',None)
-        # find client 
+        self.connection.close()
 
     def receive_message(self, message):
         # TODO: Handle incoming message
-        print message    
+        messages = message.split('}')
+        for message in messages:
+            if message == '':
+                continue
+            message += '}'
+            message_json = json.loads(message)
+            print message_json['timestamp'] + ' - ' + message_json['sender'] + ' says: ' + message_json['content']
 
     def send_payload(self, request, content):
         # TODO: Handle sending of a payload
-        data = json.dumps({'request': request, 'content': content})
-        self.connection.send(data)
+        try:
+            data = json.dumps({'request': request, 'content': content})
+            self.connection.send(data)
+        except Exception as e:
+            print e
+            print "[BAD COMMAND]"
 
 if __name__ == '__main__':
     """
