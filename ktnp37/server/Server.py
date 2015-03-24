@@ -61,7 +61,7 @@ def sendMessagetoClients(message):
 def sendNamestoThisClient(client):
 
 def sendHelpTexttoThisClient(client):
-
+    
 def sendError(client):
 
 def response(responsetype, content, sender):
