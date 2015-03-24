@@ -2,6 +2,7 @@
 import socket
 import json
 from MessageReceiver import MessageReceiver
+import sys
 
 class Client:
     """
@@ -65,7 +66,7 @@ class Client:
                 continue
             message += '}'
             message_json = json.loads(message)
-            print message_json['timestamp'] + ' - ' + message_json['sender'] + ' says: ' + message_json['content']
+            print ((message_json['timestamp'] + ' - ' + message_json['sender'] + ' says: ') if (message_json["response"] == "message") else "") + message_json['content']
 
     def send_payload(self, request, content):
         # TODO: Handle sending of a payload
@@ -82,4 +83,13 @@ if __name__ == '__main__':
     in your terminal.
     No alterations is necessary
     """
-    client = Client('localhost', 9998)
+    # client = Client('localhost', 9998)
+
+    # Take host and port from arguments if possible
+    HOST = 'localhost'
+    PORT = 9998
+    if len(sys.argv) > 1:
+        HOST = sys.argv[1]
+        if len(sys.argv) > 2:
+            PORT = int(sys.argv[2])
+    client = Client(HOST, PORT)
