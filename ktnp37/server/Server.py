@@ -31,28 +31,35 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             received_dict = json.loads(received_string)
 
             if(self in logged_in):
-                if((received_dict[0])['request'] == "login"):
-                    user_name = (received_dict[0])['content']
-                    login(self, user_name)
-                elif((received_dict[0])['request'] == "logout"):
+                elif(received_dict["request"] == "logout"):
                     logout(self)
-                elif((received_dict[0])['request'] == "msg"):
+                elif(received_dict["request"] == "msg"):
                     message = (received_dict[0])['content']
                     sendMessagetoClients(message)
-                elif((received_dict[0])['request'] == "names"):
+                elif(received_dict["request"] == "names"):
                     sendNamestoThisClient(self)
-                elif((received_dict[0])['request'] == "help"):
+                elif(received_dict["request"] == "help"):
                     sendHelpTexttoThisClient(self)
                 else:
                     sendError(self)
-            elif((received_dict[0])['request'] == "help"):
+            elif(received_dict["request"] == "help"):
                 sendHelpTexttoThisClient(self)
+            elif(received_dict["request"] == "login"):
+                    user_name = (received_dict[0])['content']
+                    login(self, user_name)
             else:
                 sendError(self)
 
 
 
 def login(client, user_name):
+    if(usernameValid(user_name)):
+        logged_in.append(client)
+        logged_in.append(user_name)
+        response(client, "info", history, "")
+        response(client, "info", "--------------\n logged in as ".append(user_name), client)
+    else:
+        sendError(client)
 
 def logout(client):
 
