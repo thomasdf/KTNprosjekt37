@@ -105,15 +105,15 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             logged_in[x].response("message", message, logged_in[index+1])
 
     def sendNamestoThisClient(self):
-        usernames = self.makeHeader("Users currently logged into the server")
+        content = self.makeHeader("Users currently logged into the server")
         for i in xrange (1, len(logged_in), 2):
-            usernames += logged_in[i] + "\n"
-        self.response("info", usernames, "")
+            content += logged_in[i] + "\n"
+        self.response("info", content, "")
 
     def sendHelpTexttoThisClient(self):
-        usernames = self.makeHeader("Help") + "This client console accepts commands: \n\n" + "login <username>: logs on the server with the given username.\n" + "logout: logs out of the server.\n" + "msg <message>: sends a message to the chatroom.\n" + "names: list the user in the chatroom.\n" + "help: lists this message.\n\n"
+        content = self.makeHeader("Help") + "This client console accepts commands: \n\n" + "login <username>: logs on the server with the given username.\n" + "logout: logs out of the server.\n" + "msg <message>: sends a message to the chatroom.\n" + "names: list the user in the chatroom.\n" + "help: lists this message.\n\n"
 
-        self.response('info', usernames, '')
+        self.response('info', content, '')
 
     def sendError(self, message):
         self.response('error', self.makeHeader("Error") + 'Well, this is embarrassing! An error has occured. Maybe you could help yourself out by typing help for command reference?\n\n', '')
