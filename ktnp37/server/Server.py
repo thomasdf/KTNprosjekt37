@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 import SocketServer
+import json
+from time import gmtime, strftime
+
+history = ''
+logged_in = []
+
 
 
 class ClientHandler(SocketServer.BaseRequestHandler):
@@ -21,9 +27,71 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         # Loop that listens for messages from the client
         while True:
             received_string = self.connection.recv(4096)
-            
             # TODO: Add handling of received payload from client
+            
+            received_dict = json.loads(received_string)
 
+            if(self in logged_in):
+                if((received_dict[0])['request'] == "login"):
+                    user_name = (received_dict[0])['content']
+                    login(self, user_name)
+                elif((received_dict[0])['request'] == "logout"):
+                    logout(self)
+                elif((received_dict[0])['request'] == "msg"):
+                    message = (received_dict[0])['content']
+                    sendMessagetoClients(message)
+                elif((received_dict[0])['request'] == "names"):
+                    sendNamestoThisClient(self)
+                elif((received_dict[0])['request'] == "help"):
+                    sendHelpTexttoThisClient(self)
+                else:
+                    sendError(self)
+            elif((received_dict[0])['request'] == "help"):
+                sendHelpTexttoThisClient(self)
+            else:
+                sendError(self)
+
+
+
+def login(client, user_name):
+
+def logout(client):
+    # Remove the client from the logged_in list
+    index = logged_in.index(client)
+    del logged_in[index:index+2]
+    
+    # Send a logout-respone to the client
+    response(client, "info", "Successfully logged out.", "")
+    
+    # Disconnect the client
+    client.connection.close()
+
+def sendMessagetoClients(message):
+
+def sendNamestoThisClient(client):
+
+def sendHelpTexttoThisClient(client):
+
+def sendError(client):
+
+def response(client, responsetype, content, sender):
+    # Get the timestamp for the time NOW
+    timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
+    # Get a string from a dict as a json-object
+    payload = json.dumps({"timestamp": timestamp, "sender": sender, "response": responsetype, "content": content})
+    
+    # --- START TESTPRINTING ---
+    print payload
+    # --- END TESTPRINTING ---
+
+    # Check if we want to send to ALL connected clients, or just to one
+    if (responsetype == "message"):
+        for i in xrange(0, len(logged_in), 2):
+            cur_client = logged_in[i]
+            cur_client.connection.send(payload)
+    else:
+        client.connection.send(payload)
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
