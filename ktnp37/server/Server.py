@@ -32,6 +32,11 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             except:
                 pass
             # TODO: Add handling of received payload from client
+
+            # Check if a client force-dcs
+            if received_string == "" and self in logged_in:
+                self.logout()
+
             # Deserialize
             received_dict = 0
             try:
@@ -79,7 +84,9 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     def login(self, user_name):
         global logged_in
 
-        if self.usernameValid(user_name):
+        if user_name in logged_in:
+            self.sendError("Someone with that username is already logged in.")
+        elif self.usernameValid(user_name):
             logged_in.append(self)
             logged_in.append(user_name)
             self.response("info", self.makeHeader("Log from the chat-server") + history + "\n\n" + self.makeHeader("Logged in as " + user_name), "")
@@ -87,13 +94,13 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             self.sendError("Your username is not valid. Only characters a-z, A-Z, 0-9, dashes and underscores are allowed.")
 
     def logout(self):
-        # Defince global
+        # Define global
         global logged_in
 
         # Remove the client from the logged_in list
         index = logged_in.index(self)
         del logged_in[index:index+2]
-        
+
         # Send a logout-respone to the client
         self.response("info", self.makeHeader("You have been successfully logged out."), "")
 
@@ -107,16 +114,15 @@ class ClientHandler(SocketServer.BaseRequestHandler):
     def sendNamestoThisClient(self):
         content = self.makeHeader("Users currently logged into the server")
         for i in xrange (1, len(logged_in), 2):
-            content += logged_in[i] + "\n"
+            content += " + " + logged_in[i] + "\n"
         self.response("info", content, "")
 
     def sendHelpTexttoThisClient(self):
         content = self.makeHeader("Help") + "This client console accepts commands: \n\n" + "login <username>: logs on the server with the given username.\n" + "logout: logs out of the server.\n" + "msg <message>: sends a message to the chatroom.\n" + "names: list the user in the chatroom.\n" + "help: lists this message.\n\n"
-
         self.response('info', content, '')
 
     def sendError(self, message):
-        self.response('error', self.makeHeader("Error") + 'Well, this is embarrassing! An error has occured. Maybe you could help yourself out by typing help for command reference?\n\n', '')
+        self.response('error', self.makeHeader("Error") + 'Well, this is embarrassing! An error has occured. Maybe you could help yourself out by typing help for command reference?\n\n[ERROR MESSAGE]: ' + message + "\n\n", '')
 
     def response(self, responsetype, content, sender):
         try:

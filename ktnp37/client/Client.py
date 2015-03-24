@@ -21,7 +21,6 @@ class Client:
         self.host = host
         self.server_port = server_port
         self.receiver = MessageReceiver(self, self.connection)
-        self.dc = False
 
         # TODO: Finish init process with necessary code
         # self.connection.bind((self.host, self.server_port))
@@ -37,15 +36,13 @@ class Client:
         self.receiver.start()
 
         message = ""
-        while not self.dc:
+        while True:
             message = raw_input()
             message = message.strip()
             splitted = message.split()
             if (len(splitted) == 0):
                 continue
             elif len(splitted) == 1:
-                if splitted[0] == "logout":
-                    self.dc = True
                 self.send_payload(splitted[0], None)
             elif len(splitted) == 2:
                 self.send_payload(splitted[0], splitted[1])

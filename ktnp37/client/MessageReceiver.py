@@ -28,7 +28,7 @@ class MessageReceiver(Thread):
         # Listen to the server
         # self.connection.listen(4)
 
-        while not self.client.dc:
+        while True:
             # Get the payload from the json-object
             payload = self.connection.recv(4096)
 
