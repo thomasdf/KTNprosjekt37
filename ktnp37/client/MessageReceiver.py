@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 from threading import Thread
-import json
-from socket import *
 
 class MessageReceiver(Thread):
     """
@@ -14,8 +12,8 @@ class MessageReceiver(Thread):
         """
         This method is executed when creating a new MessageReceiver object
         """
-        # TODO: Init the superconstructor
-        Thread.__init__(self)
+        # Init the superconstructor
+        super(MessageReceiver, self).__init__()
 
         # Flag to run thread as a deamon
         self.daemon = True
@@ -24,39 +22,15 @@ class MessageReceiver(Thread):
         self.client = client
         self.connection = connection
         print "[+] New thread started for " + client.host + ":" + str(client.server_port)
-        self.run()
 
     def run(self):
         # TODO: Make MessageReceiver receive and handle payloads
-        while True:
-            # Listen to the server
-            self.connection.listen(4)
+        # Listen to the server
+        # self.connection.listen(4)
 
+        while not self.client.dc:
             # Get the payload from the json-object
-            payload = json.loads(connection.recv(4096))
-            
-            # --- START TESTPRINTING ---
-            print payload
-            # --- END TESTPRINTING ---
-
-            # Get all the info from the payload
-            timestamp = payload["timestamp"]
-            sender = payload["sender"]
-            response = payload["response"]
-            content = payload["content"]
-
-            # Handle the different types of responses
-            message = timestamp + ": "
-            if (response == "error"):
-                message.append("[ERROR] -\t" + content)
-            elif (response == "info"):
-                message.append("[INFO] -\t" + content)
-            elif (response == "history"):
-                message.append("[HIST] -\n" + content)
-            elif (response == "message"):
-                message.append("[MSG] -\t" + sender + " says: " + content)
-            else:
-                message.append("[BAD REQUEST]")
+            payload = self.connection.recv(4096)
 
             # Send the message onward to the client
-            self.client.receive_message(message)
+            self.client.receive_message(payload)

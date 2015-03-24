@@ -7,8 +7,6 @@ import re
 history = ''
 logged_in = []
 
-
-
 class ClientHandler(SocketServer.BaseRequestHandler):
     """
     This is the ClientHandler class. Everytime a new client connects to the
@@ -24,105 +22,106 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
         self.connection = self.request
+        self.broken = False
 
         # Loop that listens for messages from the client
-        while True:
-            received_string = self.connection.recv(4096)
+        while not self.broken:
+            try:
+                received_string = self.connection.recv(4096)
+            except:
+                pass
             # TODO: Add handling of received payload from client
-            
-            received_dict = json.loads(received_string)
+            # Deserialize
+            received_dict = 0
+            try:
+                received_dict = json.loads(received_string)
+                if "request" not in received_dict or "content" not in received_dict:
+                    raise ValueError
+            except:
+                self.sendError()
+                continue
 
             if self in logged_in:
                 if received_dict["request"] == "logout":
-                    logout(self)
+                    self.logout()
                 elif received_dict["request"] == "msg":
                     message = received_dict['content']
-                    sendMessagetoClients(message)
+                    self.sendMessagetoClients(message)
                 elif received_dict["request"] == "names":
-                    sendNamestoThisClient(self)
+                    self.sendNamestoThisClient()
                 elif received_dict["request"] == "help":
-                    sendHelpTexttoThisClient(self)
+                    self.sendHelpTexttoThisClient()
                 else:
-                    sendError(self)
+                    self.sendError()
             elif received_dict["request"] == "help":
-                sendHelpTexttoThisClient(self)
+                self.sendHelpTexttoThisClient()
             elif received_dict["request"] == "login":
                     user_name = received_dict['content']
-                    login(self, user_name)
+                    self.login(user_name)
             else:
-                sendError(self)
+                self.sendError()
 
 
-def usernameValid(user_name):
+    def usernameValid(self, user_name):
 
-    if not re.match("^[A-Za-z0-9_-]*$", user_name):
-        return False
-        #print("Error! Only characters a-z, A-Z and 0-9 are allowed!")
-    else:
-        return True
-        #print("Your username is now: " + username)
+        if not re.match("^[A-Za-z0-9_-]*$", user_name):
+            return False
+            #print("Error! Only characters a-z, A-Z and 0-9 are allowed!")
+        else:
+            return True
+            #print("Your username is now: " + username)
 
-def login(client, user_name):
-    if usernameValid(user_name):
-        logged_in.append(client)
-        logged_in.append(user_name)
-        response(client, "info", history, "")
-        response(client, "info", "--------------\n logged in as ".append(user_name), client)
-    else:
-        sendError(client)
+    def login(self, user_name):
+        global logged_in
 
-def logout(client):
-    # Remove the client from the logged_in list
-    index = logged_in.index(client)
-    del logged_in[index:index+2]
-    
-    # Send a logout-respone to the client
-    response(client, "info", "Successfully logged out.", "")
-    
-    # Disconnect the client
-    client.connection.close()
+        if self.usernameValid(user_name):
+            logged_in.append(self)
+            logged_in.append(user_name)
+            self.response("info", history + "\n--------------\n logged in as " + user_name, "")
+        else:
+            self.sendError()
 
-def sendMessagetoClients(message):
-    index = logged_in.index(self)
-    history.append(logged_in[index+1] + ": " + message + "\n")
-    for x in xrange(0,len(logged_in), 2):
-        response(logged_in[x], "message", message, logged_in(index+1))
+    def logout(self):
+        # Defince global
+        global logged_in
 
-def sendNamestoThisClient(client):
-    pass
+        # Remove the client from the logged_in list
+        index = logged_in.index(self)
+        del logged_in[index:index+2]
+        
+        # Send a logout-respone to the client
+        self.response("info", "Successfully logged out.", "")
 
-def sendHelpTexttoThisClient(client):
-    help_content = "Help\n\n"
-    + "This client console accepts commands: \n\n"
-    + "login <username>: logs on the server with the given username.\n"
-    + "logout: logs out of the server.\n"
-    + "msg <message>: sends a message to the chatroom.\n"
-    + "names: list the user in the chatroom.\n"
-    + "help: lists this message.\n"
-    
-    response(client, 'info', help_content, '')
+    def sendMessagetoClients(self, message):
+        global history
+        index = logged_in.index(self)
+        history += logged_in[index+1] + ": " + message + "\n"
+        for x in xrange(0, len(logged_in), 2):
+            logged_in[x].response("message", message, logged_in[index+1])
 
-def sendError(client):
-    response(client, 'error', 'This is embarrassing! Type help for command reference.\n Are you logged in?', '')
+    def sendNamestoThisClient(self):
+        pass
 
-def response(client, responsetype, content, sender):
-    # Get the timestamp for the time NOW
-    timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    def sendHelpTexttoThisClient(self):
+        help_content = "Help\n\n" + "This client console accepts commands: \n\n" + "login <username>: logs on the server with the given username.\n" + "logout: logs out of the server.\n" + "msg <message>: sends a message to the chatroom.\n" + "names: list the user in the chatroom.\n" + "help: lists this message.\n"
 
-    # Get a string from a dict as a json-object
-    payload = json.dumps({"timestamp": timestamp, "sender": sender, "response": responsetype, "content": content})
-    
-    # --- START TESTPRINTING ---
-    print payload
-    # --- END TESTPRINTING ---
+        self.response('info', help_content, '')
 
-    # Check if we want to send to ALL connected clients, or just to one
-    if responsetype == "message":
-        for i in xrange(0, len(logged_in), 2):
-            cur_client = logged_in[i]
-            cur_client.connection.send(payload)
-    else:
-        client.connection.send(payload)
+    def sendError(self):
+        self.response('error', 'This is embarrassing! Type help for command reference.\n Are you logged in?', '')
+
+    def response(self, responsetype, content, sender):
+        try:
+            # Get the timestamp for the time NOW
+            timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
+            # Get a string from a dict as a json-object
+            payload = json.dumps({"timestamp": timestamp, "sender": sender, "response": responsetype, "content": content})
+
+            # Check if we want to send to ALL connected clients, or just to one
+            self.connection.send(payload)
+        except:
+            self.broken = True
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
