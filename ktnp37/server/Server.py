@@ -61,7 +61,16 @@ def sendMessagetoClients(message):
 def sendNamestoThisClient(client):
 
 def sendHelpTexttoThisClient(client):
+    help_content = "Help\n\n"
+    help_content += "This client console accepts commands: \n\n"
+    help_content += "login <username>: logs on the server with the given username.\n"
+    help_content += "logout: logs out of the server.\n"
+    help_content += "msg <message>: sends a message to the chatroom.\n"
+    help_content += "names: list the user in the chatroom.\n"
+    help_content += "help: lists this message.\n"
     
+    self.response('info', help_content, '')
+
 def sendError(client):
 
 def response(responsetype, content, sender):
