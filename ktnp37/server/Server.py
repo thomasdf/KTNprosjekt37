@@ -33,6 +33,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             if(self in logged_in):
                 if((received_dict[0])['request'] == "login"):
                     user_name = (received_dict[0])['content']
+                    login(self, user_name)
                 elif((received_dict[0])['request'] == "logout"):
                     logout(self)
                 elif((received_dict[0])['request'] == "msg"):
@@ -51,17 +52,17 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
 
 
-def login(ClientHandler client, user_name):
+def login(client, user_name):
 
-def logout(ClientHandler client):
+def logout(client):
 
 def sendMessagetoClients(message):
 
-def sendNamestoThisClient(ClientHandler client):
+def sendNamestoThisClient(client):
 
-def sendHelpTexttoThisClient(ClientHandler client):
+def sendHelpTexttoThisClient(client):
 
-def sendError(ClientHandler client):
+def sendError(client):
     
 
 
