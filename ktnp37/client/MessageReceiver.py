@@ -29,11 +29,17 @@ class MessageReceiver(Thread):
     def run(self):
         # TODO: Make MessageReceiver receive and handle payloads
         while True:
+            # Listen to the server
             self.connection.listen(5)
+
+            # Get the payload from the json-object
             payload = json.loads(connection.recv(4096))
-            # TESTPRINTING
+            
+            # --- START TESTPRINTING ---
             print payload
-            # TESTPRINTING
+            # --- END TESTPRINTING ---
+
+            # Get all the info from the payload
             timestamp = payload["timestamp"]
             sender = payload["sender"]
             response = payload["response"]
@@ -51,4 +57,6 @@ class MessageReceiver(Thread):
                 message.append("[MSG] -\t" + sender + " says: " + content)
             else:
                 message.append("[BAD REQUEST]")
+
+            # Send the message onward to the client
             self.client.receive_message(message)
