@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import socket
 import json
+from MessageReceiver import MessageReceiver
 
 class Client:
     """
@@ -16,47 +17,47 @@ class Client:
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = host
         self.server_port = server_port
-        self.run()
 
         # TODO: Finish init process with necessary code
-        self.connection.bind((self.host, selv.port))
-        self.message_receiver = MessageReceiver(self,self.connection)
+        # self.connection.bind((self.host, self.server_port))
+        # self.connection.settimeout(4)
 
-        login = raw_input("Username: ")
-        this.send_payload(login)
-        message = ""
-        while(message!= "logout"):
-            message = raw_input(": ")
-            message = message.strip()
-            message = message.split()
-            if(len(message)==1):
-                self.send_payload(message[0], None)
-            elif(len(message)==2):
-                self.send_payload(message[0],message[1])
-
-        self.disconnect()
+        self.run()
 
     def run(self):
         # Initiate the connection to the server
         self.connection.connect((self.host, self.server_port))
 
+        # Accepting the connection and creating a clientSocket
+        (clientSocket, (ip, addr)) = self.connection.accept()
+
+        # Create the Message Receiver for the socket
+        message_receiver = MessageReceiver(self, clientSocket)
+
+        message = ""
+        while message != "logout":
+            message = raw_input(": ")
+            message = message.strip()
+            message = message.split()
+            if len(message)==1:
+                self.send_payload(message[0], None)
+            elif len(message)==2:
+                self.send_payload(message[0],message[1])
+        self.disconnect()
+
     def disconnect(self):
         # TODO: Handle disconnection
         send_payload('logout',None)
         # find client 
-        pass
 
     def receive_message(self, message):
         # TODO: Handle incoming message
         print message    
-        pass
 
     def send_payload(self, request, content):
         # TODO: Handle sending of a payload
         data = json.dumps({'request': request, 'content': content})
         self.connection.send(data)
-        pass
-
 
 if __name__ == '__main__':
     """

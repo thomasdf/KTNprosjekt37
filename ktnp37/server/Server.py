@@ -32,22 +32,22 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             
             received_dict = json.loads(received_string)
 
-            if(self in logged_in):
-                elif(received_dict["request"] == "logout"):
+            if self in logged_in:
+                if received_dict["request"] == "logout":
                     logout(self)
-                elif(received_dict["request"] == "msg"):
-                    message = (received_dict[0])['content']
+                elif received_dict["request"] == "msg":
+                    message = received_dict['content']
                     sendMessagetoClients(message)
-                elif(received_dict["request"] == "names"):
+                elif received_dict["request"] == "names":
                     sendNamestoThisClient(self)
-                elif(received_dict["request"] == "help"):
+                elif received_dict["request"] == "help":
                     sendHelpTexttoThisClient(self)
                 else:
                     sendError(self)
-            elif(received_dict["request"] == "help"):
+            elif received_dict["request"] == "help":
                 sendHelpTexttoThisClient(self)
-            elif(received_dict["request"] == "login"):
-                    user_name = (received_dict[0])['content']
+            elif received_dict["request"] == "login":
+                    user_name = received_dict['content']
                     login(self, user_name)
             else:
                 sendError(self)
@@ -63,7 +63,7 @@ def usernameValid(user_name):
         #print("Your username is now: " + username)
 
 def login(client, user_name):
-    if(usernameValid(user_name)):
+    if usernameValid(user_name):
         logged_in.append(client)
         logged_in.append(user_name)
         response(client, "info", history, "")
@@ -85,19 +85,20 @@ def logout(client):
 def sendMessagetoClients(message):
     index = logged_in.index(self)
     history.append(logged_in[index+1] + ": " + message + "\n")
-    for(x in xrange(0,len(logged_in), 2)):
+    for x in xrange(0,len(logged_in), 2):
         response(logged_in[x], "message", message, logged_in(index+1))
 
 def sendNamestoThisClient(client):
+    pass
 
 def sendHelpTexttoThisClient(client):
     help_content = "Help\n\n"
-     + "This client console accepts commands: \n\n"
-     + "login <username>: logs on the server with the given username.\n"
-     + "logout: logs out of the server.\n"
-     + "msg <message>: sends a message to the chatroom.\n"
-     + "names: list the user in the chatroom.\n"
-     + "help: lists this message.\n"
+    + "This client console accepts commands: \n\n"
+    + "login <username>: logs on the server with the given username.\n"
+    + "logout: logs out of the server.\n"
+    + "msg <message>: sends a message to the chatroom.\n"
+    + "names: list the user in the chatroom.\n"
+    + "help: lists this message.\n"
     
     response(client, 'info', help_content, '')
 
@@ -116,7 +117,7 @@ def response(client, responsetype, content, sender):
     # --- END TESTPRINTING ---
 
     # Check if we want to send to ALL connected clients, or just to one
-    if (responsetype == "message"):
+    if responsetype == "message":
         for i in xrange(0, len(logged_in), 2):
             cur_client = logged_in[i]
             cur_client.connection.send(payload)
