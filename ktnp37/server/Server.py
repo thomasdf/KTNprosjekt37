@@ -2,6 +2,7 @@
 import SocketServer
 import json
 from time import gmtime, strftime
+import re
 
 history = ''
 logged_in = []
@@ -52,6 +53,14 @@ class ClientHandler(SocketServer.BaseRequestHandler):
                 sendError(self)
 
 
+def usernameValid(user_name):
+
+    if not re.match("^[A-Za-z0-9_-]*$", user_name):
+        return False
+        #print("Error! Only characters a-z, A-Z and 0-9 are allowed!")
+    else:
+        return True
+        #print("Your username is now: " + username)
 
 def login(client, user_name):
     if(usernameValid(user_name)):
