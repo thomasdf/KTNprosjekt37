@@ -56,6 +56,15 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 def login(client, user_name):
 
 def logout(client):
+    # Remove the client from the logged_in list
+    index = logged_in.index(client)
+    del logged_in[index:index+2]
+    
+    # Send a logout-respone to the client
+    response(client, "info", "Successfully logged out.", "")
+    
+    # Disconnect the client
+    client.connection.close()
 
 def sendMessagetoClients(message):
 
@@ -65,12 +74,24 @@ def sendHelpTexttoThisClient(client):
 
 def sendError(client):
 
-def response(responsetype, content, sender):
+def response(client, responsetype, content, sender):
+    # Get the timestamp for the time NOW
     timestamp = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-    
 
+    # Get a string from a dict as a json-object
+    payload = json.dumps({"timestamp": timestamp, "sender": sender, "response": responsetype, "content": content})
     
+    # --- START TESTPRINTING ---
+    print payload
+    # --- END TESTPRINTING ---
 
+    # Check if we want to send to ALL connected clients, or just to one
+    if (responsetype == "message"):
+        for i in xrange(0, len(logged_in), 2):
+            cur_client = logged_in[i]
+            cur_client.connection.send(payload)
+    else:
+        client.connection.send(payload)
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """
