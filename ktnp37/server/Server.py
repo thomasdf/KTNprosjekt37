@@ -5,7 +5,7 @@ from time import gmtime, strftime
 import re
 import sys
 
-history = ''
+history = []
 logged_in = []
 
 class ClientHandler(SocketServer.BaseRequestHandler):
@@ -20,6 +20,8 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         """
         This method handles the connection between a client and the server.
         """
+        global logged_in
+
         self.ip = self.client_address[0]
         self.port = self.client_address[1]
         self.connection = self.request
@@ -34,7 +36,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
             # TODO: Add handling of received payload from client
 
             # Check if a client force-dcs
-            if received_string == "" and self in logged_in:
+            if (received_string == "" or received_string == "exit") and self in logged_in:
                 self.logout()
 
             # Deserialize
@@ -69,7 +71,6 @@ class ClientHandler(SocketServer.BaseRequestHandler):
 
 
     def usernameValid(self, user_name):
-
         if not re.match("^[A-Za-z0-9_-]*$", user_name):
             return False
         else:
@@ -82,6 +83,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         return filler + center + filler + "\n"
 
     def login(self, user_name):
+        # Define global
         global logged_in
 
         if user_name in logged_in:
@@ -89,7 +91,10 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         elif self.usernameValid(user_name):
             logged_in.append(self)
             logged_in.append(user_name)
-            self.response("info", self.makeHeader("Log from the chat-server") + history + "\n\n" + self.makeHeader("Logged in as " + user_name), "")
+            formatted_history = ""
+            for elem in history:
+                formatted_history += elem
+            self.response("info", self.makeHeader("Log from the chat-server") + formatted_history + "\n" + self.makeHeader("Logged in as " + user_name), "")
         else:
             self.sendError("Your username is not valid. Only characters a-z, A-Z, 0-9, dashes and underscores are allowed.")
 
@@ -105,9 +110,11 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.response("info", self.makeHeader("You have been successfully logged out."), "")
 
     def sendMessagetoClients(self, message):
+        # Define global
         global history
+
         index = logged_in.index(self)
-        history += logged_in[index+1] + ": " + message + "\n"
+        history.append(" + " + logged_in[index+1] + " said: " + message + "\n")
         for x in xrange(0, len(logged_in), 2):
             logged_in[x].response("message", message, logged_in[index+1])
 
@@ -122,7 +129,7 @@ class ClientHandler(SocketServer.BaseRequestHandler):
         self.response('info', content, '')
 
     def sendError(self, message):
-        self.response('error', self.makeHeader("Error") + 'Well, this is embarrassing! An error has occured. Maybe you could help yourself out by typing help for command reference?\n\n[ERROR MESSAGE]: ' + message + "\n\n", '')
+        self.response('error', self.makeHeader("Error") + 'Well, this is embarrassing! An error has occured. Maybe you could help yourself out by typing help for a command reference?\n\n[ERROR MESSAGE]: ' + message + "\n\n", '')
 
     def response(self, responsetype, content, sender):
         try:
