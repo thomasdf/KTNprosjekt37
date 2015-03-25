@@ -37,19 +37,23 @@ class Client:
 
         message = ""
         while True:
-            message = raw_input()
-            message = message.strip()
-            splitted = message.split()
-            if (len(splitted) == 0):
-                continue
-            elif len(splitted) == 1:
-                self.send_payload(splitted[0], None)
-            elif len(splitted) == 2:
-                self.send_payload(splitted[0], splitted[1])
-            else:
-                first_space = message.index(" ")
-                self.send_payload(message[:first_space], message[first_space+1:])
-        self.disconnect()
+            try:
+                message = raw_input()
+                message = message.strip()
+                splitted = message.split()
+                if (len(splitted) == 0):
+                    continue
+                elif len(splitted) == 1:
+                    self.send_payload(splitted[0], None)
+                elif len(splitted) == 2:
+                    self.send_payload(splitted[0], splitted[1])
+                else:
+                    first_space = message.index(" ")
+                    self.send_payload(message[:first_space], message[first_space+1:])
+            except KeyboardInterrupt:
+                self.connection.send("exit")
+                self.disconnect()
+                sys.exit()
 
     def disconnect(self):
         # TODO: Handle disconnection
